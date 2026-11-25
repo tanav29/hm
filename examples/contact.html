@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Document</title>
+</head>
+<body>
+  <main class="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+    <section class="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8">
+      <h1 class="text-3xl font-bold text-slate-900">Say hello</h1>
+      <p class="mt-2 text-slate-600">Tell us what you are working on.</p>
+      <form class="mt-6 space-y-4" action="/contact" method="post">
+        <div>
+          <label class="block text-sm font-medium text-slate-700" for="name">Name</label>
+          <input id="name" class="mt-1 w-full rounded-lg border border-slate-300 p-3" name="name" type="text" required="required">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700" for="email">Email</label>
+          <input id="email" class="mt-1 w-full rounded-lg border border-slate-300 p-3" name="email" type="email" required="required">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700" for="message">Message</label>
+          <textarea id="message" class="mt-1 w-full rounded-lg border border-slate-300 p-3" name="message" rows="4"></textarea>
+        </div>
+        <button class="rounded-lg bg-slate-900 px-5 py-3 text-white hover:bg-slate-700" type="submit">Send message</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
