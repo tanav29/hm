@@ -194,6 +194,9 @@ impl Parser {
                         '%' => "src",
                         _ => "alt",
                     };
+                    if marker != '&' && self.peek() != Some('"') {
+                        return Err(self.error("URL shorthand values must be double-quoted"));
+                    }
                     let url = if self.peek() == Some('"') {
                         self.quoted()?
                     } else {
@@ -278,6 +281,9 @@ impl Parser {
                 return Err(self.error(&format!("duplicate {key}")));
             }
             self.bump();
+            if matches!(key.as_str(), "href" | "src") && self.peek() != Some('"') {
+                return Err(self.error("URL attribute values must be double-quoted"));
+            }
             let value = if self.peek() == Some('"') {
                 self.quoted()?
             } else {
@@ -516,7 +522,7 @@ mod tests {
     #[test]
     fn href_shorthand() {
         assert_eq!(
-            compile("a.btn$/about \"About\"", true).unwrap(),
+            compile(r#"a.btn$"/about" "About""#, true).unwrap(),
             "<a class=\"btn\" href=\"/about\">About</a>\n"
         );
         assert_eq!(
@@ -524,16 +530,22 @@ mod tests {
             "<a href=\"https://example.com/?a=1&amp;b=2\">Link</a>\n"
         );
         assert!(compile("a$", true).is_err());
+        assert!(compile("a$/about", true).is_err());
+        assert!(compile("a href=/about", true).is_err());
+        assert_eq!(
+            compile(r##"a$"/x?#a&b=%20!$[x]{y}""##, true).unwrap(),
+            "<a href=\"/x?#a&amp;b=%20!$[x]{y}\"></a>\n"
+        );
         assert!(compile(r#"a$/x[href="/y"]"#, true).is_err());
     }
     #[test]
     fn image_shorthand_and_id() {
         assert_eq!(
-            compile(r#"img%photo.jpg&"Portrait of Alex"[id="photo"]"#, true).unwrap(),
+            compile(r#"img%"photo.jpg"&"Portrait of Alex"[id="photo"]"#, true).unwrap(),
             "<img src=\"photo.jpg\" alt=\"Portrait of Alex\" id=\"photo\">\n"
         );
-        assert!(compile(r#"img%photo[src="other"]"#, true).is_err());
-        assert!(compile("img%photo&", true).is_err());
+        assert!(compile(r#"img%"photo"[src="other"]"#, true).is_err());
+        assert!(compile(r#"img%"photo"&"#, true).is_err());
         assert_eq!(
             compile("div#hello", true).unwrap(),
             "<div id=\"hello\"></div>\n"

@@ -9,14 +9,14 @@ Use `tag.class#id[attr="value"] "text" { children }`. Text and children are opti
 
 ```text
 main.p-6 {
-  img%photo.jpg&"Portrait"
-  a.hover:underline$/about "About"
+  img%"photo.jpg"&"Portrait"
+  a.hover:underline$"/about" "About"
   input! type=email name=address
 }
 ```
 
 - Put selectors before attributes; avoid duplicate IDs or attributes and `[class=...]`.
-- `$`, `%`, `&`, `!` set `href`, `src`, `alt`, and `required`. Quote shorthand values containing whitespace or `# % & $ ! [ ] { }`.
+- `$`, `%`, `&`, `!` set `href`, `src`, `alt`, and `required`. Always double-quote `href` and `src` values. Quote alt shorthand values containing whitespace or `# % & $ ! [ ] { }`.
 - Other attributes: ` name=value`, ` name="value with spaces"`, or `[name="value"]`; `[name]` emits an empty value. Unquoted spaced values cannot contain whitespace, brackets, braces, or quotes.
 - Quote text. Strings support `\"`, `\\`, `\n`, `\t`; output is HTML-escaped. `//` comments occur between elements. Void elements cannot have text or children.
 - Tailwind variants and arbitrary values work: `.md:flex`, `.w-[2.5rem]`, `.[&>p]:text-red-500`. Use underscores for spaces in brackets; decimal classes outside brackets are unsupported.

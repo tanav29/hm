@@ -4,8 +4,8 @@ A compact syntax for generating HTML with Tailwind CSS. By default, hm outputs a
 
 ```text
 main.min-h-screen {
-  img#avatar%photo.jpg&"Portrait of Alex"
-  a.text-blue-500$/about "About"
+  img#avatar%"photo.jpg"&"Portrait of Alex"
+  a.text-blue-500$"/about" "About"
 }
 ```
 
@@ -28,12 +28,12 @@ The CLI reports input and output character counts, parse and render time, and th
 | --- | --- | --- |
 | `.class` | CSS or Tailwind class; leading selector implies `div` | `.flex.md:flex` |
 | `#id` | Element ID | `div#main` |
-| `$value` | `href` attribute | `a$/about "About"` |
-| `%value` | `src` attribute | `img%photo.jpg` |
+| `$value` | `href` attribute | `a$"/about" "About"` |
+| `%value` | `src` attribute | `img%"photo.jpg"` |
 | `&value` | `alt` attribute | `img&"A portrait"` |
 | `!` | Required attribute | `input!` |
 
-Put selectors before attribute shorthands. Quote shorthand values containing whitespace, `#`, `%`, `&`, `$`, `!`, brackets, or braces. Other attributes can be written after a space, such as `input.field type=email name=address`, or in brackets as `[name="value"]`. Spaced attribute values can be unquoted when they contain no whitespace, brackets, braces, or quotes; use double quotes otherwise or for an empty value. Bracketed values require double quotes. `[required]` renders an empty value for boolean attributes; IDs may also use `id=value` or `[id="value"]`.
+Put selectors before attribute shorthands. Always double-quote URL values for `href` and `src`, including spaced attributes. Quote alt shorthand values containing whitespace, `#`, `%`, `&`, `$`, `!`, brackets, or braces. Other attributes can be written after a space, such as `input.field type=email name=address`, or in brackets as `[name="value"]`. Spaced attribute values can be unquoted when they contain no whitespace, brackets, braces, or quotes; use double quotes otherwise or for an empty value. Bracketed values require double quotes. `[required]` renders an empty value for boolean attributes; IDs may also use `id=value` or `[id="value"]`.
 
 Put quoted text after a space and children inside `{ ... }`. Comments start with `//` between elements. Strings support `\"`, `\\`, `\n`, and `\t`; text and attribute values are HTML-escaped. Void elements such as `img` and `input` cannot contain text or children.
 
