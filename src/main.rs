@@ -1,7 +1,6 @@
 use std::{
     env, fs,
-    io::{self, Read},
-    path::Path,
+    io::{self, Read, Write},
     process,
     time::Instant,
 };
@@ -122,7 +121,10 @@ impl Parser {
             }
         }
     }
-    fn nodes(&mut self, nested: bool) -> Result<Vec<Node>, String> {
+    fn nodes(&mut self, nested: bool, depth: usize) -> Result<Vec<Node>, String> {
+        if depth > 128 {
+            return Err(self.error("maximum nesting depth exceeded"));
+        }
         let mut nodes = Vec::new();
         loop {
             self.space();
@@ -134,12 +136,20 @@ impl Parser {
                     break;
                 }
                 Some('}') => return Err(self.error("unexpected '}'")),
-                _ => nodes.push(self.node()?),
+                Some('"') if nested => nodes.push(Node {
+                    tag: String::new(),
+                    classes: vec![],
+                    id: None,
+                    attrs: vec![],
+                    text: Some(self.quoted()?),
+                    children: vec![],
+                }),
+                _ => nodes.push(self.node(depth)?),
             }
         }
         Ok(nodes)
     }
-    fn node(&mut self) -> Result<Node, String> {
+    fn node(&mut self, depth: usize) -> Result<Node, String> {
         // A selector without a tag is a compact div, as in CSS and Emmet.
         let tag = if matches!(self.peek(), Some('.') | Some('#')) {
             "div".to_string()
@@ -228,6 +238,14 @@ impl Parser {
                     {
                         return Err(self.error("invalid attribute name"));
                     }
+                    let key = key.to_ascii_lowercase();
+                    if !key
+                        .chars()
+                        .next()
+                        .is_some_and(|c| c.is_ascii_alphabetic() || c == '_' || c == ':')
+                    {
+                        return Err(self.error("invalid attribute name"));
+                    }
                     if key == "class" {
                         return Err(self.error("use .class selectors"));
                     }
@@ -274,6 +292,14 @@ impl Parser {
                 break;
             }
             let key: String = self.chars[start..self.pos].iter().collect();
+            let key = key.to_ascii_lowercase();
+            if !key
+                .chars()
+                .next()
+                .is_some_and(|c| c.is_ascii_alphabetic() || c == '_' || c == ':')
+            {
+                return Err(self.error("invalid attribute name"));
+            }
             if key == "class" {
                 return Err(self.error("use .class selectors"));
             }
@@ -317,7 +343,7 @@ impl Parser {
         }
         if self.peek() == Some('{') {
             self.bump();
-            n.children = self.nodes(true)?;
+            n.children = self.nodes(true, depth + 1)?;
         }
         if is_void(&n.tag) && (n.text.is_some() || !n.children.is_empty()) {
             return Err(self.error("void elements cannot have content"));
@@ -327,7 +353,7 @@ impl Parser {
 }
 fn is_void(tag: &str) -> bool {
     matches!(
-        tag,
+        tag.to_ascii_lowercase().as_str(),
         "area"
             | "base"
             | "br"
@@ -353,6 +379,10 @@ fn escape(s: &str) -> String {
 }
 fn render(nodes: &[Node], depth: usize, out: &mut String) {
     for n in nodes {
+        if n.tag.is_empty() {
+            out.push_str(&escape(n.text.as_deref().unwrap_or("")));
+            continue;
+        }
         let pad = "  ".repeat(depth);
         out.push_str(&format!("{pad}<{}", n.tag));
         if let Some(id) = &n.id {
@@ -369,9 +399,21 @@ fn render(nodes: &[Node], depth: usize, out: &mut String) {
             out.push_str(&escape(t));
         }
         if !n.children.is_empty() {
-            out.push('\n');
-            render(&n.children, depth + 1, out);
-            out.push_str(&pad);
+            if n.children.iter().any(|c| c.tag.is_empty()) {
+                for child in &n.children {
+                    if child.tag.is_empty() {
+                        out.push_str(&escape(child.text.as_deref().unwrap_or("")));
+                    } else {
+                        let mut part = String::new();
+                        render(std::slice::from_ref(child), 0, &mut part);
+                        out.push_str(part.trim_end_matches('\n'));
+                    }
+                }
+            } else {
+                out.push('\n');
+                render(&n.children, depth + 1, out);
+                out.push_str(&pad);
+            }
         }
         if !is_void(&n.tag) {
             out.push_str(&format!("</{}>", n.tag));
@@ -380,7 +422,7 @@ fn render(nodes: &[Node], depth: usize, out: &mut String) {
     }
 }
 fn compile(input: &str, fragment: bool) -> Result<String, String> {
-    let nodes = Parser::new(input).nodes(false)?;
+    let nodes = Parser::new(input).nodes(false, 0)?;
     let mut out = String::new();
     if !fragment {
         out.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4\"></script>\n  <title>Document</title>\n</head>\n<body>\n");
@@ -401,7 +443,7 @@ fn run() -> Result<(), String> {
         match arg.as_str() {
             "-h" | "--help" => {
                 println!(
-                    "Usage: hm [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; defaults to an HTML file in the OS temporary directory. --tokens reports token estimates."
+                    "Usage: hm [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; writes HTML to stdout by default. --tokens reports token estimates."
                 );
                 return Ok(());
             }
@@ -425,21 +467,15 @@ fn run() -> Result<(), String> {
         }
         Some(path) => fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?,
     };
-    let output = output.unwrap_or_else(|| {
-        let name = input
-            .as_deref()
-            .filter(|path| *path != "-")
-            .and_then(|path| Path::new(path).file_stem())
-            .filter(|name| !name.is_empty())
-            .unwrap_or_else(|| std::ffi::OsStr::new("output"));
-        let mut path = env::temp_dir().join(name);
-        path.set_extension("html");
-        path.to_string_lossy().into_owned()
-    });
     let started = Instant::now();
     let html = compile(&source, fragment)?;
     let elapsed = started.elapsed();
-    fs::write(&output, &html).map_err(|e| format!("{output}: {e}"))?;
+    match output.as_deref() {
+        None | Some("-") => io::stdout()
+            .write_all(html.as_bytes())
+            .map_err(|e| e.to_string())?,
+        Some(path) => fs::write(path, &html).map_err(|e| format!("{path}: {e}"))?,
+    }
     eprintln!(
         "Characters: {} before, {} after",
         source.chars().count(),
@@ -449,8 +485,10 @@ fn run() -> Result<(), String> {
         "Parse and render time: {:.3} ms",
         elapsed.as_secs_f64() * 1000.0
     );
-    let location = fs::canonicalize(&output).map_err(|e| format!("{output}: {e}"))?;
-    eprintln!("Saved to: {}", location.display());
+    if let Some(path) = output.as_deref().filter(|p| *p != "-") {
+        let location = fs::canonicalize(path).map_err(|e| format!("{path}: {e}"))?;
+        eprintln!("Saved to: {}", location.display());
+    }
     if !tokens {
         return Ok(());
     }
