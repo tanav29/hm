@@ -33,7 +33,7 @@ The CLI reports input and output character counts, parse and render time, and th
 | `&value` | `alt` attribute | `img&"A portrait"` |
 | `!` | Required attribute | `input!` |
 
-Put selectors before attribute shorthands. Quote shorthand values containing whitespace, `#`, `%`, `&`, `$`, `!`, brackets, or braces. Other attributes use `[name="value"]` and can be repeated; `[required]` renders an empty value for boolean attributes; IDs may also use `[id="value"]`.
+Put selectors before attribute shorthands. Quote shorthand values containing whitespace, `#`, `%`, `&`, `$`, `!`, brackets, or braces. Other attributes can be written after a space, such as `input.field type=email name=address`, or in brackets as `[name="value"]`. Spaced attribute values can be unquoted when they contain no whitespace, brackets, braces, or quotes; use double quotes otherwise or for an empty value. Bracketed values require double quotes. `[required]` renders an empty value for boolean attributes; IDs may also use `id=value` or `[id="value"]`.
 
 Put quoted text after a space and children inside `{ ... }`. Comments start with `//` between elements. Strings support `\"`, `\\`, `\n`, and `\t`; text and attribute values are HTML-escaped. Void elements such as `img` and `input` cannot contain text or children.
 

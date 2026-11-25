@@ -257,6 +257,49 @@ impl Parser {
         {
             self.bump();
         }
+        // An equals sign distinguishes a spaced attribute from the next sibling.
+        loop {
+            let start = self.pos;
+            while self
+                .peek()
+                .is_some_and(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | ':'))
+            {
+                self.bump();
+            }
+            if self.pos == start || self.peek() != Some('=') {
+                self.pos = start;
+                break;
+            }
+            let key: String = self.chars[start..self.pos].iter().collect();
+            if key == "class" {
+                return Err(self.error("use .class selectors"));
+            }
+            if (key == "id" && n.id.is_some()) || n.attrs.iter().any(|(k, _)| k == &key) {
+                return Err(self.error(&format!("duplicate {key}")));
+            }
+            self.bump();
+            let value = if self.peek() == Some('"') {
+                self.quoted()?
+            } else {
+                let start = self.pos;
+                while self.peek().is_some_and(|c| {
+                    !c.is_whitespace() && !matches!(c, '{' | '}' | '[' | ']' | '"' | '\'')
+                }) {
+                    self.bump();
+                }
+                if self.pos == start {
+                    return Err(self.error("expected an attribute value"));
+                }
+                self.chars[start..self.pos].iter().collect()
+            };
+            n.attrs.push((key, value));
+            while self
+                .peek()
+                .is_some_and(|c| c == ' ' || c == '\t' || c == '\r')
+            {
+                self.bump();
+            }
+        }
         if self.peek() == Some('"') {
             n.text = Some(self.quoted()?);
             while self
@@ -518,5 +561,28 @@ mod tests {
         assert_eq!(compile("input!", true).unwrap(), "<input required=\"\">\n");
         assert!(compile("input![required]", true).is_err());
         assert!(compile("input[required]!", true).is_err());
+    }
+    #[test]
+    fn spaced_attributes_and_siblings() {
+        assert_eq!(
+            compile(
+                "input.field type=\"email\" name=\"a&b\"\ndiv p \"hi\"",
+                true
+            )
+            .unwrap(),
+            "<input class=\"field\" type=\"email\" name=\"a&amp;b\">\n<div></div>\n<p>hi</p>\n"
+        );
+        assert!(compile("input[type=\"x\"] type=\"y\"", true).is_err());
+        assert!(compile("div#x id=\"y\"", true).is_err());
+        assert_eq!(
+            compile("input type=email name=address", true).unwrap(),
+            "<input type=\"email\" name=\"address\">\n"
+        );
+        assert_eq!(
+            compile("div title=hello { p \"hi\" }", true).unwrap(),
+            "<div title=\"hello\">\n  <p>hi</p>\n</div>\n"
+        );
+        assert!(compile("input type=", true).is_err());
+        assert!(compile("div class=\"x\"", true).is_err());
     }
 }
