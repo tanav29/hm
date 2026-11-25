@@ -1,24 +1,23 @@
 ---
 name: hol-markup
-description: Write compact .hm files for the twhtml HTML and Tailwind transpiler.
+description: Write compact .hm files for the hm HTML and Tailwind transpiler.
 ---
 
 # HOL markup
 
-Write `tag.class#id[attr="value"] "text" { children }`. Text and children are optional. A leading `.class` or `#id` implies `div`. Separate sibling elements with whitespace; use newlines for readability.
+Use `tag.class#id[attr="value"] "text" { children }`. Text and children are optional; a leading `.class` or `#id` implies `div`. Separate siblings with whitespace.
 
 ```text
 main.p-6 {
-  .flex.gap-4 {
-    img%photo.jpg&"Portrait"
-    a.hover:underline$/about "About"
-  }
+  img%photo.jpg&"Portrait"
+  a.hover:underline$/about "About"
   input! type=email name=address
 }
 ```
 
-- `.class` adds a class, `#id` an ID. Use selectors before attributes. Repeat selectors and attributes as needed; don't use `[class=...]` or duplicate IDs/attributes.
-- `$`, `%`, and `&` set `href`, `src`, and `alt`. Quote values containing whitespace or `# % & $ ! [ ] { }` (e.g. `$"/?a=1&b=2"`). Other attributes use ` name=value`, ` name="value with spaces"`, or `[name="value"]`. Unquoted spaced values cannot contain whitespace, brackets, braces, or quotes. `!` sets `required`; `[name]` emits an empty value, useful for boolean attributes.
-- Quote text. Strings support `\"`, `\\`, `\n`, and `\t`; output is HTML-escaped. `//` starts a comment between elements. Void elements cannot contain text or children.
-- Tailwind variants and arbitrary values work: `.md:flex`, `.w-[2.5rem]`, `.[&>p]:text-red-500`. Use underscores for spaces inside brackets; decimal classes outside brackets are unsupported.
-- Run `cargo run -- input.hm -o output.html`. Output is a complete document using the Tailwind browser CDN; use `--fragment` to omit the wrapper and CDN. Add `--tokens` for token estimates. Errors report line and column.
+- Put selectors before attributes; avoid duplicate IDs or attributes and `[class=...]`.
+- `$`, `%`, `&`, `!` set `href`, `src`, `alt`, and `required`. Quote shorthand values containing whitespace or `# % & $ ! [ ] { }`.
+- Other attributes: ` name=value`, ` name="value with spaces"`, or `[name="value"]`; `[name]` emits an empty value. Unquoted spaced values cannot contain whitespace, brackets, braces, or quotes.
+- Quote text. Strings support `\"`, `\\`, `\n`, `\t`; output is HTML-escaped. `//` comments occur between elements. Void elements cannot have text or children.
+- Tailwind variants and arbitrary values work: `.md:flex`, `.w-[2.5rem]`, `.[&>p]:text-red-500`. Use underscores for spaces in brackets; decimal classes outside brackets are unsupported.
+- Run `cargo run -- input.hm -o output.html`; add `--fragment` to omit the document wrapper and Tailwind CDN, or `--tokens` for token estimates. Errors include line and column.

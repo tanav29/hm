@@ -395,7 +395,7 @@ fn run() -> Result<(), String> {
         match arg.as_str() {
             "-h" | "--help" => {
                 println!(
-                    "Usage: twhtml [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; defaults to an HTML file in the OS temporary directory. --tokens reports token estimates."
+                    "Usage: hm [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; defaults to an HTML file in the OS temporary directory. --tokens reports token estimates."
                 );
                 return Ok(());
             }
@@ -474,7 +474,7 @@ fn run() -> Result<(), String> {
 }
 fn main() {
     if let Err(e) = run() {
-        eprintln!("twhtml: {e}");
+        eprintln!("hm: {e}");
         process::exit(1);
     }
 }

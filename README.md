@@ -1,6 +1,6 @@
-# twhtml
+# hm
 
-A compact syntax for generating HTML with Tailwind CSS. By default, twhtml outputs a complete HTML document using the Tailwind browser CDN.
+A compact syntax for generating HTML with Tailwind CSS. By default, hm outputs a complete HTML document using the Tailwind browser CDN.
 
 ```text
 main.min-h-screen {
@@ -47,7 +47,7 @@ Tailwind variants and arbitrary values work, for example `.hover:bg-blue-500`, `
 cargo run --release -- examples/stillwater.hm -o examples/stillwater.html --tokens
 ```
 
-One release-mode run produced 4,235 input chars - 1,267 input tokens and 5,259 output chars - 1,570 output tokens in 0.167 ms (parse and render only). The `o200k_base` estimate was 1,267 tokens for the source, 1,570 for the HTML, and 398 for the current skill: a saving of 303 tokens (19.3%), or -95 (-6.1%) including the skill once. Timing varies by machine and run; token counts depend on the tokenizer.
+One release-mode run produced 4,235 input chars - 1,267 input tokens and 5,259 output chars - 1,570 output tokens in 0.167 ms (parse and render only). The `o200k_base` estimate was 1,267 tokens for the source, 1,570 for the HTML, and 348 for the current skill: a saving of 303 tokens (19.3%), or -45 (-2.9%) including the skill once. Timing varies by machine and run; token counts depend on the tokenizer.
 
 Two shorter examples are also available:
 
@@ -56,6 +56,6 @@ Two shorter examples are also available:
 | [Morrow café](examples/morrow.hm) ([HTML](examples/morrow.html)) | 2,236 | 3,005 | 696 | 926 | 230 (24.8%) |
 | [Recipe](examples/recipe.hm) ([HTML](examples/recipe.html)) | 1,279 | 1,712 | 380 | 528 | 148 (28.0%) |
 
-These token savings exclude the 398-token skill; including it once gives -168 (-18.1%) and -250 (-47.3%), respectively. The examples use external photographs and the Tailwind CDN.
+These token savings exclude the 348-token skill; including it once gives -118 (-12.7%) and -200 (-37.9%), respectively. The examples use external photographs and the Tailwind CDN.
 
-[`examples/compact.hm`](examples/compact.hm) demonstrates implicit `div` selectors and a boolean attribute in 468 characters ([HTML](examples/compact.html)). One run estimated 137 source tokens and 250 HTML tokens: 45.2% fewer without the skill, or 114.0% more including the skill once.
+[`examples/compact.hm`](examples/compact.hm) demonstrates implicit `div` selectors and a boolean attribute in 468 characters ([HTML](examples/compact.html)). One run estimated 137 source tokens and 250 HTML tokens: 45.2% fewer without the skill, or 94.0% more including the skill once.
