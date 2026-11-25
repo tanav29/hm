@@ -1,21 +1,21 @@
 ---
 name: hol-markup
-description: Write or edit .hm files for the twhtml HTML and Tailwind transpiler.
+description: Write .hm for the twhtml HTML and Tailwind transpiler.
 ---
 
 # HOL markup
 
-Write `.hm` files as a sequence of HTML elements. Use `tag.class.class#id`, immediately followed by attributes as `[name="value"]`; put quoted text after a space and children in braces. Tailwind classes are enabled by default.
+Write elements as `tag.class#id[attr="value"] "text" { children }` (text and children optional). Repeat attributes; use `.class`, not `[class=...]`. Example:
 
 ```text
-main.min-h-screen.bg-slate-950.text-white {
-  h1.text-4xl.font-bold "Hello"
-  a.text-blue-400.hover:underline$/about "About"
+main.min-h-screen {
+  img%photo.jpg&"Portrait"
+  a.hover:underline$/about "About"
 }
 ```
 
-Use `$URL` after the tag or classes for `href` (or `$"URL"` for URLs containing whitespace, brackets, or braces); put classes first.
+`$` sets href, `%` src, `&` alt. Put selectors first; quote shorthand values containing whitespace, `#`, `%`, `&`, `$`, brackets or braces. `//` starts a comment between elements. Strings support `\"`, `\\`, `\n`, `\t`; output is HTML-escaped. Void elements cannot have content.
 
-Use `//` comments between elements. Strings accept `\"`, `\\`, `\n`, and `\t`; the compiler escapes text and attribute values. Void elements cannot contain text or children. Use selectors for class and id, not attributes. Colon variants such as `.md:flex` work; arbitrary values and variants work (e.g. `.w-[2.5rem]`, `.[&>p]:text-red-500`); use underscores for spaces in brackets. Decimal class names outside brackets are not supported.
+Tailwind variants and arbitrary values work, e.g. `.md:flex`, `.w-[2.5rem]`, `.[&>p]:text-red-500`; use underscores for spaces in brackets. Decimal classes outside brackets are unsupported.
 
-Compile with `cargo run -- input.hm -o output.html` from the twhtml project. Use `--fragment` to omit the document wrapper and Tailwind browser CDN. The CDN is intended for prototypes; use a Tailwind build for production.
+Run `cargo run -- input.hm -o output.html`. Default output is a complete document with Tailwind browser CDN (for prototypes); `--fragment` omits the wrapper and CDN.

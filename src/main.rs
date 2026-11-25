@@ -55,7 +55,11 @@ impl Parser {
     fn word(&mut self) -> String {
         let start = self.pos;
         while self.peek().is_some_and(|c| {
-            !c.is_whitespace() && !matches!(c, '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"' | '$')
+            !c.is_whitespace()
+                && !matches!(
+                    c,
+                    '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"' | '$' | '&' | '%'
+                )
         }) {
             self.bump();
         }
@@ -163,30 +167,38 @@ impl Parser {
                     }
                     if marker == '.' {
                         n.classes.push(value);
-                    } else if n.id.replace(value).is_some() {
+                    } else if n.attrs.iter().any(|(k, _)| k == "id")
+                        || n.id.replace(value).is_some()
+                    {
                         return Err(self.error("duplicate id"));
                     }
                 }
-                Some('$') => {
-                    self.bump();
+                Some('$') | Some('%') | Some('&') => {
+                    let marker = self.bump().unwrap();
+                    let key = match marker {
+                        '$' => "href",
+                        '%' => "src",
+                        _ => "alt",
+                    };
                     let url = if self.peek() == Some('"') {
                         self.quoted()?
                     } else {
                         let start = self.pos;
                         while self.peek().is_some_and(|c| {
-                            !c.is_whitespace() && !matches!(c, '{' | '}' | '[' | ']')
+                            !c.is_whitespace()
+                                && !matches!(c, '{' | '}' | '[' | ']' | '&' | '#' | '$' | '%')
                         }) {
                             self.bump();
                         }
                         self.chars[start..self.pos].iter().collect()
                     };
                     if url.is_empty() {
-                        return Err(self.error("expected a URL after '$'"));
+                        return Err(self.error("expected a value after shorthand"));
                     }
-                    if n.attrs.iter().any(|(key, _)| key == "href") {
-                        return Err(self.error("duplicate href"));
+                    if n.attrs.iter().any(|(k, _)| k == key) {
+                        return Err(self.error(&format!("duplicate {key}")));
                     }
-                    n.attrs.push(("href".into(), url));
+                    n.attrs.push((key.into(), url));
                 }
                 Some('[') => {
                     self.bump();
@@ -199,8 +211,8 @@ impl Parser {
                     {
                         return Err(self.error("invalid attribute name"));
                     }
-                    if key == "class" || key == "id" {
-                        return Err(self.error("use .class or #id selectors"));
+                    if key == "class" {
+                        return Err(self.error("use .class selectors"));
                     }
                     self.space();
                     if self.bump() != Some('=') {
@@ -212,8 +224,8 @@ impl Parser {
                     if self.bump() != Some(']') {
                         return Err(self.error("expected ']'"));
                     }
-                    if key == "href" && n.attrs.iter().any(|(k, _)| k == "href") {
-                        return Err(self.error("duplicate href"));
+                    if (key == "id" && n.id.is_some()) || n.attrs.iter().any(|(k, _)| k == &key) {
+                        return Err(self.error(&format!("duplicate {key}")));
                     }
                     n.attrs.push((key, value));
                 }
@@ -426,6 +438,20 @@ mod tests {
         );
         assert!(compile("a$", true).is_err());
         assert!(compile(r#"a$/x[href="/y"]"#, true).is_err());
+    }
+    #[test]
+    fn image_shorthand_and_id() {
+        assert_eq!(
+            compile(r#"img%photo.jpg&"Portrait of Alex"[id="photo"]"#, true).unwrap(),
+            "<img src=\"photo.jpg\" alt=\"Portrait of Alex\" id=\"photo\">\n"
+        );
+        assert!(compile(r#"img%photo[src="other"]"#, true).is_err());
+        assert!(compile("img%photo&", true).is_err());
+        assert_eq!(
+            compile("div#hello", true).unwrap(),
+            "<div id=\"hello\"></div>\n"
+        );
+        assert!(compile(r#"div#hello[id="other"]"#, true).is_err());
     }
     #[test]
     fn errors() {
