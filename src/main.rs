@@ -1,7 +1,9 @@
 use std::{
     env, fs,
     io::{self, Read},
+    path::Path,
     process,
+    time::Instant,
 };
 
 #[derive(Debug)]
@@ -328,16 +330,18 @@ fn run() -> Result<(), String> {
     let mut input = None;
     let mut output = None;
     let mut fragment = false;
+    let mut tokens = false;
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "-h" | "--help" => {
                 println!(
-                    "Usage: twhtml [INPUT] [-o OUTPUT] [--fragment]\nReads stdin and writes stdout when paths are omitted."
+                    "Usage: twhtml [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; defaults to an HTML file in the OS temporary directory. --tokens reports token estimates."
                 );
                 return Ok(());
             }
             "--fragment" => fragment = true,
+            "--tokens" => tokens = true,
             "-o" | "--output" => output = Some(args.next().ok_or("missing output path")?),
             _ if arg.starts_with('-') && arg != "-" => {
                 return Err(format!("unknown option: {arg}"));
@@ -356,11 +360,35 @@ fn run() -> Result<(), String> {
         }
         Some(path) => fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?,
     };
+    let output = output.unwrap_or_else(|| {
+        let name = input
+            .as_deref()
+            .filter(|path| *path != "-")
+            .and_then(|path| Path::new(path).file_stem())
+            .filter(|name| !name.is_empty())
+            .unwrap_or_else(|| std::ffi::OsStr::new("output"));
+        let mut path = env::temp_dir().join(name);
+        path.set_extension("html");
+        path.to_string_lossy().into_owned()
+    });
+    let started = Instant::now();
     let html = compile(&source, fragment)?;
-    match output {
-        Some(path) => fs::write(&path, &html).map_err(|e| format!("{path}: {e}"))?,
-        None => print!("{html}"),
-    };
+    let elapsed = started.elapsed();
+    fs::write(&output, &html).map_err(|e| format!("{output}: {e}"))?;
+    eprintln!(
+        "Characters: {} before, {} after",
+        source.chars().count(),
+        html.chars().count()
+    );
+    eprintln!(
+        "Parse and render time: {:.3} ms",
+        elapsed.as_secs_f64() * 1000.0
+    );
+    let location = fs::canonicalize(&output).map_err(|e| format!("{output}: {e}"))?;
+    eprintln!("Saved to: {}", location.display());
+    if !tokens {
+        return Ok(());
+    }
     let tokenizer = tiktoken_rs::o200k_base().map_err(|e| format!("tokenizer: {e}"))?;
     let count = |s: &str| tokenizer.encode_ordinary(s).len();
     let source_tokens = count(&source);

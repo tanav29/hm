@@ -18,9 +18,9 @@ cargo run -- examples/landing.hm -o landing.html
 cargo run -- --fragment examples/landing.hm
 ```
 
-Omit the input path (or use `-`) to read stdin; omit `-o` to write to stdout. `--fragment` omits the document wrapper and CDN. The default document uses English and the title `Document`; use a fragment for a custom wrapper. The CDN requires network access and is intended for prototypes; use a Tailwind build for production.
+Omit the input path (or use `-`) to read stdin. Omit `-o` to save an HTML file named after the input in the OS temporary directory (or `output.html` for stdin). `--fragment` omits the document wrapper and CDN. The default document uses English and the title `Document`; use a fragment for a custom wrapper. The CDN requires network access and is intended for prototypes; use a Tailwind build for production.
 
-The CLI reports estimated `o200k_base` token savings on stderr, with and without the skill file. Token counts vary by model; count the skill once when using multiple files.
+The CLI reports input and output character counts, parse and render time, and the output location on stderr. Add `--tokens` to also report estimated `o200k_base` token savings, with and without the skill file. Token counting adds overhead; counts vary by model, and the skill should be counted once when using multiple files.
 
 ## Syntax
 
