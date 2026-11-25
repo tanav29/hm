@@ -24,6 +24,7 @@ Omit the input path (or use `-`) to read standard input; omit `-o` to write to s
 ## Syntax
 
 - Start an element with its tag, followed immediately by `.class` selectors and an optional `#id`.
+- Add `$URL` after a tag or its classes as shorthand for `href`, for example `a.text-blue-500$/about "About"`. Use `$"URL"` for URLs containing whitespace, brackets, or braces; put classes before the shorthand.
 - Add attributes immediately after the selectors as `[name="value"]`; repeat for multiple attributes. Use selectors for `class` and `id`.
 - Add quoted text after a space, and nest elements inside `{ ... }`. Comments start with `//` between elements.
 - Strings support `\"`, `\\`, `\n`, and `\t`. Text and attribute values are HTML-escaped.

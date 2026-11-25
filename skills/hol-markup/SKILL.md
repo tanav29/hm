@@ -10,9 +10,11 @@ Write `.hm` files as a sequence of HTML elements. Use `tag.class.class#id`, imme
 ```text
 main.min-h-screen.bg-slate-950.text-white {
   h1.text-4xl.font-bold "Hello"
-  a.text-blue-400.hover:underline[href="/about"] "About"
+  a.text-blue-400.hover:underline$/about "About"
 }
 ```
+
+Use `$URL` after the tag or classes for `href` (or `$"URL"` for URLs containing whitespace, brackets, or braces); put classes first.
 
 Use `//` comments between elements. Strings accept `\"`, `\\`, `\n`, and `\t`; the compiler escapes text and attribute values. Void elements cannot contain text or children. Use selectors for class and id, not attributes. Colon variants such as `.md:flex` work; arbitrary values and variants work (e.g. `.w-[2.5rem]`, `.[&>p]:text-red-500`); use underscores for spaces in brackets. Decimal class names outside brackets are not supported.
 

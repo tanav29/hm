@@ -1,9 +1,9 @@
-﻿// A small landing page
+// A small landing page
 main.min-h-screen.bg-slate-950.text-white.flex.items-center.justify-center.p-8 {
   div.max-w-xl {
     p.text-cyan-400.font-semibold "HELLO, WORLD"
     h1.text-5xl.font-bold.mt-4 "Make something wonderful."
     p.text-slate-300.mt-6 "A little syntax for big ideas."
-    a.inline-block.mt-8.rounded-lg.bg-cyan-400.px-5.py-3.font-semibold.text-slate-950.hover:bg-cyan-300[href="https://example.com"] "Get started"
+    a.inline-block.mt-8.rounded-lg.bg-cyan-400.px-5.py-3.font-semibold.text-slate-950.hover:bg-cyan-300$https://example.com "Get started"
   }
 }

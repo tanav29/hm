@@ -55,7 +55,7 @@ impl Parser {
     fn word(&mut self) -> String {
         let start = self.pos;
         while self.peek().is_some_and(|c| {
-            !c.is_whitespace() && !matches!(c, '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"')
+            !c.is_whitespace() && !matches!(c, '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"' | '$')
         }) {
             self.bump();
         }
@@ -167,6 +167,27 @@ impl Parser {
                         return Err(self.error("duplicate id"));
                     }
                 }
+                Some('$') => {
+                    self.bump();
+                    let url = if self.peek() == Some('"') {
+                        self.quoted()?
+                    } else {
+                        let start = self.pos;
+                        while self.peek().is_some_and(|c| {
+                            !c.is_whitespace() && !matches!(c, '{' | '}' | '[' | ']')
+                        }) {
+                            self.bump();
+                        }
+                        self.chars[start..self.pos].iter().collect()
+                    };
+                    if url.is_empty() {
+                        return Err(self.error("expected a URL after '$'"));
+                    }
+                    if n.attrs.iter().any(|(key, _)| key == "href") {
+                        return Err(self.error("duplicate href"));
+                    }
+                    n.attrs.push(("href".into(), url));
+                }
                 Some('[') => {
                     self.bump();
                     self.space();
@@ -190,6 +211,9 @@ impl Parser {
                     self.space();
                     if self.bump() != Some(']') {
                         return Err(self.error("expected ']'"));
+                    }
+                    if key == "href" && n.attrs.iter().any(|(k, _)| k == "href") {
+                        return Err(self.error("duplicate href"));
                     }
                     n.attrs.push((key, value));
                 }
@@ -389,6 +413,19 @@ mod tests {
                 .unwrap_err()
                 .contains("unterminated arbitrary value")
         );
+    }
+    #[test]
+    fn href_shorthand() {
+        assert_eq!(
+            compile("a.btn$/about \"About\"", true).unwrap(),
+            "<a class=\"btn\" href=\"/about\">About</a>\n"
+        );
+        assert_eq!(
+            compile(r#"a$"https://example.com/?a=1&b=2" "Link""#, true).unwrap(),
+            "<a href=\"https://example.com/?a=1&amp;b=2\">Link</a>\n"
+        );
+        assert!(compile("a$", true).is_err());
+        assert!(compile(r#"a$/x[href="/y"]"#, true).is_err());
     }
     #[test]
     fn errors() {
