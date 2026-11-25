@@ -1,0 +1,20 @@
+﻿// A small recipe card with responsive layout and an image.
+main.min-h-screen.bg-[#f4f0e6].text-[#343b31].px-5.py-12 {
+  article.mx-auto.max-w-5xl.overflow-hidden.rounded-[2rem].bg-white.md:grid.md:grid-cols-2 {
+    img.h-72.w-full.object-cover.md:h-full%"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=85"&"A bowl of pasta with fresh herbs"
+    div.p-8.md:p-12 {
+      p.text-sm.font-semibold.text-[#6a785b] "The everyday table / Lunch"
+      h1.mt-4.font-serif.text-5xl.leading-tight "Lemon & herb pasta"
+      p.mt-5.leading-relaxed.text-[#626b5d] "A bright, simple bowl for the days when lunch should feel like a pause."
+      p.mt-6.border-y.border-[#e6e9e2].py-4.text-sm.font-semibold "25 minutes  ·  Serves 2"
+      h2.mt-7.font-serif.text-2xl "You'll need"
+      p.mt-3.leading-relaxed "Pasta, one lemon, olive oil, parmesan, a handful of parsley, salt and pepper."
+      h2.mt-7.font-serif.text-2xl "Make it"
+      ol.mt-3.list-decimal.space-y-3.pl-5.leading-relaxed {
+        li "Cook the pasta in well-salted water; save a cup of the cooking water."
+        li "Toss with lemon zest, juice, olive oil and a splash of pasta water."
+        li "Finish with parmesan, parsley and plenty of black pepper."
+      }
+    }
+  }
+}

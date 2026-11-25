@@ -1,0 +1,45 @@
+﻿// A compact neighborhood café page.
+main.min-h-screen.bg-[#f7f3eb].text-[#34291f] {
+  header.mx-auto.flex.max-w-6xl.items-center.justify-between.px-6.py-7 {
+    a.font-serif.text-3xl.font-bold$"#home" "Morrow"
+    nav.flex.gap-6.text-sm[aria-label="Main navigation"] {
+      a.hover:underline$"#menu" "Menu"
+      a.hover:underline$"#visit" "Visit"
+    }
+  }
+  section#home.mx-auto.grid.max-w-6xl.gap-8.px-6.pb-20.md:grid-cols-2.md:items-center {
+    div.py-8.md:py-16 {
+      p.text-sm.font-semibold.text-[#9b5033] "Coffee, baked things, and time well spent."
+      h1.mt-5.font-serif.text-6xl.leading-[1.05].md:text-7xl "Come in.\nStay a while."
+      p.mt-6.max-w-md.text-lg.leading-relaxed.text-[#67594b] "A neighborhood café for slow mornings, good conversations, and another cup."
+      a.mt-8.inline-block.rounded-full.bg-[#473b2e].px-6.py-4.text-sm.font-semibold.text-white.hover:bg-[#76543c]$"#visit" "Find us"
+    }
+    img.aspect-[4/5].w-full.rounded-t-full.object-cover%"https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1000&q=85"&"A cup of coffee on a café table"
+  }
+  section#menu.bg-[#e8ddcc].px-6.py-20 {
+    div.mx-auto.max-w-6xl {
+      h2.font-serif.text-5xl "A little of what we love."
+      div.mt-10.grid.gap-8.md:grid-cols-3 {
+        article.border-t.border-[#a99b89].pt-5 {
+          h3.font-serif.text-2xl "Coffee"
+          p.mt-3.leading-relaxed.text-[#67594b] "Thoughtfully sourced beans, made just how you like them."
+        }
+        article.border-t.border-[#a99b89].pt-5 {
+          h3.font-serif.text-2xl "Something baked"
+          p.mt-3.leading-relaxed.text-[#67594b] "Fresh pastries and cakes from our kitchen each morning."
+        }
+        article.border-t.border-[#a99b89].pt-5 {
+          h3.font-serif.text-2xl "A slower lunch"
+          p.mt-3.leading-relaxed.text-[#67594b] "Seasonal plates for a proper pause in the day."
+        }
+      }
+    }
+  }
+  footer#visit.mx-auto.flex.max-w-6xl.flex-col.gap-6.px-6.py-16.md:flex-row.md:justify-between {
+    div {
+      h2.font-serif.text-3xl "See you at Morrow."
+      p.mt-3.text-[#67594b] "Open daily, 8am–4pm"
+    }
+    a.w-fit.self-start.border-b.border-[#34291f].pb-1$"#home" "Back to the top"
+  }
+}

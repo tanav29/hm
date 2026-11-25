@@ -60,7 +60,7 @@ impl Parser {
             !c.is_whitespace()
                 && !matches!(
                     c,
-                    '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"' | '$' | '&' | '%'
+                    '.' | '#' | '{' | '}' | '[' | ']' | '=' | '"' | '$' | '&' | '%' | '!'
                 )
         }) {
             self.bump();
@@ -140,7 +140,12 @@ impl Parser {
         Ok(nodes)
     }
     fn node(&mut self) -> Result<Node, String> {
-        let tag = self.word();
+        // A selector without a tag is a compact div, as in CSS and Emmet.
+        let tag = if matches!(self.peek(), Some('.') | Some('#')) {
+            "div".to_string()
+        } else {
+            self.word()
+        };
         if tag.is_empty()
             || !tag.chars().next().unwrap().is_ascii_alphabetic()
             || !tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
@@ -157,6 +162,13 @@ impl Parser {
         };
         loop {
             match self.peek() {
+                Some('!') => {
+                    self.bump();
+                    if n.attrs.iter().any(|(k, _)| k == "required") {
+                        return Err(self.error("duplicate required"));
+                    }
+                    n.attrs.push(("required".into(), String::new()));
+                }
                 Some('.') | Some('#') => {
                     let marker = self.bump().unwrap();
                     let value = if marker == '.' {
@@ -188,7 +200,7 @@ impl Parser {
                         let start = self.pos;
                         while self.peek().is_some_and(|c| {
                             !c.is_whitespace()
-                                && !matches!(c, '{' | '}' | '[' | ']' | '&' | '#' | '$' | '%')
+                                && !matches!(c, '{' | '}' | '[' | ']' | '&' | '#' | '$' | '%' | '!')
                         }) {
                             self.bump();
                         }
@@ -217,11 +229,15 @@ impl Parser {
                         return Err(self.error("use .class selectors"));
                     }
                     self.space();
-                    if self.bump() != Some('=') {
-                        return Err(self.error("expected '='"));
-                    }
-                    self.space();
-                    let value = self.quoted()?;
+                    let value = if self.peek() == Some(']') {
+                        String::new()
+                    } else {
+                        if self.bump() != Some('=') {
+                            return Err(self.error("expected '=' or ']'"));
+                        }
+                        self.space();
+                        self.quoted()?
+                    };
                     self.space();
                     if self.bump() != Some(']') {
                         return Err(self.error("expected ']'"));
@@ -489,5 +505,18 @@ mod tests {
                 .contains("expected '}'")
         );
         assert!(compile("br \"x\"", true).is_err());
+    }
+    #[test]
+    fn compact_div_and_empty_attribute() {
+        assert_eq!(
+            compile(".panel#intro { input[type=\"email\"][required] }", true).unwrap(),
+            "<div id=\"intro\" class=\"panel\">\n  <input type=\"email\" required=\"\">\n</div>\n"
+        );
+        assert!(compile(".x[class]", true).is_err());
+        assert!(compile("#a[id]", true).is_err());
+        assert!(compile("input[required][required]", true).is_err());
+        assert_eq!(compile("input!", true).unwrap(), "<input required=\"\">\n");
+        assert!(compile("input![required]", true).is_err());
+        assert!(compile("input[required]!", true).is_err());
     }
 }

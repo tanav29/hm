@@ -1,0 +1,12 @@
+// A compact newsletter form.
+main.max-w-md.mx-auto.p-8 {
+  .rounded-xl.bg-slate-100.p-6 {
+    h1.text-2xl.font-bold "Stay in touch"
+    p.mt-2 "A little inspiration, delivered occasionally."
+    form.mt-4.space-y-3[action="/subscribe"][method="post"] {
+      label.block[for="email"] "Email address"
+      input#email.w-full.rounded.border.p-2[type="email"][name="email"]!
+      button.rounded.bg-slate-900.px-4.py-2.text-white[type="submit"] "Subscribe"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Document</title>
+</head>
+<body>
+  <main class="bg-[#e8edf0] text-[#17343b] min-h-screen">
+    <header class="mx-auto max-w-[1440px] px-6 md:px-12 py-6 flex items-center justify-between">
+      <a class="font-serif text-2xl font-bold tracking-tight" href="#home">stillwater</a>
+      <nav class="flex items-center gap-6 text-sm font-medium" aria-label="Main navigation">
+        <a class="hover:underline" href="#places">The coast</a>
+        <a class="hover:underline" href="#journal">Journal</a>
+        <a class="hidden md:block rounded-full border border-[#17343b] px-5 py-2 hover:bg-[#17343b] hover:text-white" href="#visit">Plan a visit</a>
+      </nav>
+    </header>
+    <section id="home" class="mx-auto max-w-[1440px] px-4 md:px-8">
+      <div class="relative min-h-[620px] md:min-h-[700px] overflow-hidden rounded-[1.5rem] bg-[#587b83]">
+        <img class="absolute inset-0 h-full w-full object-cover" src="https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&amp;fit=crop&amp;w=2400&amp;q=85" alt="Rocky coastline meeting the sea">
+        <div class="absolute inset-0 bg-gradient-to-r from-[#092c35]/80 via-[#092c35]/35 to-transparent"></div>
+        <div class="relative flex min-h-[620px] md:min-h-[700px] flex-col justify-end p-8 md:p-16 text-white">
+          <p class="text-sm tracking-[0.2em]">A field guide to the slower side of the sea</p>
+          <h1 class="mt-6 max-w-3xl font-serif text-6xl md:text-8xl leading-[0.95] tracking-tight">Find your own
+shoreline.</h1>
+          <p class="mt-7 max-w-md text-lg leading-relaxed text-white/90">Salt air, quiet paths, and places worth taking the long way to reach.</p>
+          <a class="mt-8 w-fit rounded-full bg-white px-6 py-4 text-sm font-semibold text-[#17343b] hover:bg-[#dcebed]" href="#places">Explore the coast</a>
+        </div>
+      </div>
+    </section>
+    <section id="places" class="mx-auto max-w-7xl px-6 md:px-12 py-20 md:py-28">
+      <div class="grid gap-8 md:grid-cols-2 md:items-end">
+        <h2 class="max-w-xl font-serif text-5xl md:text-6xl leading-tight">A little further from the everyday.</h2>
+        <p class="max-w-md text-lg leading-relaxed text-[#49636a]">Follow the water to sheltered coves, wind-shaped trails and small towns with room to breathe.</p>
+      </div>
+      <div class="mt-12 grid gap-8 md:grid-cols-12 md:items-start">
+        <article class="md:col-span-7">
+          <img class="aspect-[4/3] w-full rounded-[1rem] object-cover" src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;w=1400&amp;q=85" alt="Ocean waves rolling towards the shore">
+          <div class="mt-5 flex justify-between gap-4">
+            <div>
+              <h3 class="font-serif text-3xl">Where the water meets the land</h3>
+              <p class="mt-2 text-[#49636a]">Take the scenic route along the water.</p>
+            </div>
+            <span class="text-sm text-[#49636a]">Coastal walks</span>
+          </div>
+        </article>
+        <article class="md:col-span-5 md:pt-24">
+          <img class="aspect-[4/5] w-full rounded-[1rem] object-cover" src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="A quiet mountain lake surrounded by trees">
+          <div class="mt-5">
+            <h3 class="font-serif text-3xl">A quieter kind of morning</h3>
+            <p class="mt-2 text-[#49636a]">Find a moment of stillness by the water.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section id="journal" class="bg-[#cbdde0] px-6 py-20 md:px-12 md:py-28">
+      <div class="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 md:items-center">
+        <div>
+          <p class="text-sm font-semibold">From the journal</p>
+          <h2 class="mt-5 max-w-lg font-serif text-5xl md:text-6xl leading-tight">Leave space for the unexpected.</h2>
+          <p class="mt-6 max-w-md text-lg leading-relaxed text-[#49636a]">The best days don&#39;t always need an itinerary. Bring a good book, follow a path, and see where the light takes you.</p>
+          <a class="mt-8 inline-block border-b border-[#17343b] pb-2 font-semibold" href="#visit">A note on travelling slowly</a>
+        </div>
+        <img class="aspect-[4/3] w-full rounded-[1rem] object-cover" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;w=1200&amp;q=85" alt="Sunlight falling across a landscape">
+      </div>
+    </section>
+    <footer id="visit" class="bg-[#17343b] px-6 py-16 text-white md:px-12">
+      <div class="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="font-serif text-4xl">See you by the water.</p>
+          <p class="mt-3 text-[#cbdde0]">A little inspiration for your next escape.</p>
+        </div>
+        <a class="w-fit rounded-full border border-white/70 px-6 py-3 hover:bg-white hover:text-[#17343b]" href="#home">Back to the top</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
