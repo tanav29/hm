@@ -421,11 +421,47 @@ fn render(nodes: &[Node], depth: usize, out: &mut String) {
         out.push('\n');
     }
 }
+#[cfg(test)]
 fn compile(input: &str, fragment: bool) -> Result<String, String> {
-    let nodes = Parser::new(input).nodes(false, 0)?;
+    compile_with_title(input, fragment, None)
+}
+fn compile_with_title(input: &str, fragment: bool, title: Option<&str>) -> Result<String, String> {
+    let mut parser = Parser::new(input);
+    parser.space();
+    let start = parser.pos;
+    let mut file_title = None;
+    if parser.word() == "title" && parser.peek().is_some_and(|c| c == ' ' || c == '\t') {
+        while parser.peek().is_some_and(|c| c == ' ' || c == '\t') {
+            parser.bump();
+        }
+        if parser.peek() == Some('"') {
+            file_title = Some(parser.quoted()?);
+            while parser
+                .peek()
+                .is_some_and(|c| c == ' ' || c == '\t' || c == '\r')
+            {
+                parser.bump();
+            }
+            if !matches!(parser.peek(), None | Some('\n') | Some('/')) {
+                return Err(parser.error("expected end of title declaration"));
+            }
+            if parser.peek() == Some('/') && parser.chars.get(parser.pos + 1) != Some(&'/') {
+                return Err(parser.error("expected end of title declaration"));
+            }
+        } else {
+            parser.pos = start;
+        }
+    } else {
+        parser.pos = start;
+    }
+    let nodes = parser.nodes(false, 0)?;
     let mut out = String::new();
     if !fragment {
-        out.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4\"></script>\n  <title>Document</title>\n</head>\n<body>\n");
+        out.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4\"></script>\n  <title>");
+        out.push_str(&escape(
+            title.or(file_title.as_deref()).unwrap_or("Document"),
+        ));
+        out.push_str("</title>\n</head>\n<body>\n");
     }
     render(&nodes, if fragment { 0 } else { 1 }, &mut out);
     if !fragment {
@@ -438,17 +474,19 @@ fn run() -> Result<(), String> {
     let mut output = None;
     let mut fragment = false;
     let mut tokens = false;
+    let mut title = None;
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "-h" | "--help" => {
                 println!(
-                    "Usage: hm [INPUT] [-o OUTPUT] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; writes HTML to stdout by default. --tokens reports token estimates."
+                    "Usage: hm [INPUT] [-o OUTPUT] [--title TITLE] [--fragment] [--tokens]\nReads stdin when INPUT is omitted; writes HTML to stdout by default. --tokens reports token estimates."
                 );
                 return Ok(());
             }
             "--fragment" => fragment = true,
             "--tokens" => tokens = true,
+            "--title" => title = Some(args.next().ok_or("missing title")?),
             "-o" | "--output" => output = Some(args.next().ok_or("missing output path")?),
             _ if arg.starts_with('-') && arg != "-" => {
                 return Err(format!("unknown option: {arg}"));
@@ -468,7 +506,7 @@ fn run() -> Result<(), String> {
         Some(path) => fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?,
     };
     let started = Instant::now();
-    let html = compile(&source, fragment)?;
+    let html = compile_with_title(&source, fragment, title.as_deref())?;
     let elapsed = started.elapsed();
     match output.as_deref() {
         None | Some("-") => io::stdout()
@@ -496,7 +534,7 @@ fn run() -> Result<(), String> {
     let count = |s: &str| tokenizer.encode_ordinary(s).len();
     let source_tokens = count(&source);
     let html_tokens = count(&html);
-    let skill_tokens = count(include_str!("../skills/hol-markup/SKILL.md"));
+    let skill_tokens = count(include_str!("../skills/markup/SKILL.md"));
     let report = |total: usize| {
         if html_tokens == 0 {
             return "n/a (empty HTML)".to_string();

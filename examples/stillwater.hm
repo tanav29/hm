@@ -1,4 +1,5 @@
-﻿// A visual travel journal: nested layouts, arbitrary values and escaped attributes.
+// A visual travel journal: nested layouts, arbitrary values and escaped attributes.
+title "Stillwater"
 main.bg-[#e8edf0].text-[#17343b].min-h-screen {
   header.mx-auto.max-w-[1440px].px-6.md:px-12.py-6.flex.items-center.justify-between {
     a.font-serif.text-2xl.font-bold.tracking-tight$"#home" "stillwater"

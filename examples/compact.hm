@@ -1,4 +1,5 @@
 // A compact newsletter form.
+title "Stay in Touch"
 main.max-w-md.mx-auto.p-8 {
   .rounded-xl.bg-slate-100.p-6 {
     h1.text-2xl.font-bold "Stay in touch"

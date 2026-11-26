@@ -1,4 +1,5 @@
 // A responsive profile card
+title "Alex Morgan"
 main.min-h-screen.bg-[#eef2ff].flex.items-center.justify-center.p-6 {
   article.bg-white.rounded-2xl.shadow-xl.p-8.max-w-md.w-full {
     img.w-20.h-20.rounded-full%"https://i.pravatar.cc/160?img=12"&"Portrait of Alex Morgan"
